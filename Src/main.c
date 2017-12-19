@@ -289,6 +289,13 @@ int main(void)
 		sprintf(data, "[%d] -> {%d}\n\r", US015_echo_time, US015_distance);
 		HAL_UART_Transmit(&huart2, data, 64, 100);
 		HAL_Delay(900);
+
+		if(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_0) == GPIO_PIN_SET){
+			HAL_Delay(100);
+			if(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_0) == GPIO_PIN_SET){
+				HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_15);
+			}
+		}
 	}
   /* USER CODE END 3 */
 
