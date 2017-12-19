@@ -59,6 +59,7 @@ uint32_t US015_echo_time, US015_distance, temp_echo_time;
 char data[64];
 uint16_t dc = 0, pulse = 0, count = 0, inc = 1, dc2 = 5, count2 = 0;
 int16_t state = 0;
+int16_t ldr = 200, distance = 200;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -73,6 +74,7 @@ static void MX_ADC1_Init(void);
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
 void dimming(void);
+void dayNight(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
@@ -188,14 +190,27 @@ void dimming() {
 	}
 }
 
+void dayNight(){
+	if (state == 0) {
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_5, GPIO_PIN_RESET);
+		dc = 0;
+	} else if (state == 1) {
+		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_5, GPIO_PIN_SET);
+
+	}
+}
+
 void cal() {
 	int a = HAL_ADC_GetValue(&hadc1);
 	char c[128];
 	sprintf(c, "%d\n\r", a);
 	//HAL_UART_Transmit(&huart2,c,strlen(c),100);
-	if (a < 200) {
+	if (a < ldr) {
 		state = 1;
-	} else if (a > 300) {
+	} else if (a > ldr+100) {
 		state = 0;
 	}
 }
@@ -258,24 +273,19 @@ int main(void)
 		HAL_Delay(100);
 		US015_distance = (US015_echo_time * 34 / 100) / 2;
 
-		// Day/Night
-		if (state == 0) {
-			HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_5, GPIO_PIN_RESET);
-			dc = 0;
-		} else if (state == 1) {
-			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_5, GPIO_PIN_SET);
-
+		dayNight();
+		if(US015_distance < distance*0.7){
+			HAL_GPIO_WritePin(GPIOD, GPIO_PIN_11, GPIO_PIN_SET);
+		}else{
+			HAL_GPIO_WritePin(GPIOD, GPIO_PIN_11, GPIO_PIN_RESET);
 		}
-		if (US015_distance < 170 && US015_distance > 0 && sp == 0) {
+		if (US015_distance < distance*0.8 && US015_distance > 0 && sp == 0) {
 			sp = 1;
 			if (dc <= 20)dc = 220;
-		} else if (US015_distance > 190) {
+		} else if (US015_distance > distance-10) {
 			sp = 0;
 		}
-
+		//debugger
 		sprintf(data, "[%d] -> {%d}\n\r", US015_echo_time, US015_distance);
 		HAL_UART_Transmit(&huart2, data, 64, 100);
 		HAL_Delay(900);
@@ -536,8 +546,8 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOD, LD4_Pin|LD3_Pin|LD5_Pin|LD6_Pin 
-                          |Audio_RST_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_11|LD4_Pin|LD3_Pin|LD5_Pin 
+                          |LD6_Pin|Audio_RST_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : CS_I2C_SPI_Pin */
   GPIO_InitStruct.Pin = CS_I2C_SPI_Pin;
@@ -594,10 +604,10 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Alternate = GPIO_AF5_SPI2;
   HAL_GPIO_Init(CLK_IN_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : LD4_Pin LD3_Pin LD5_Pin LD6_Pin 
-                           Audio_RST_Pin */
-  GPIO_InitStruct.Pin = LD4_Pin|LD3_Pin|LD5_Pin|LD6_Pin 
-                          |Audio_RST_Pin;
+  /*Configure GPIO pins : PD11 LD4_Pin LD3_Pin LD5_Pin 
+                           LD6_Pin Audio_RST_Pin */
+  GPIO_InitStruct.Pin = GPIO_PIN_11|LD4_Pin|LD3_Pin|LD5_Pin 
+                          |LD6_Pin|Audio_RST_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;

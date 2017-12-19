@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Project>
-<ProjectName>/Users/aphires/git/iLight/\iLight_test</ProjectName>
-<CMSIS>../Drivers/CMSIS</CMSIS>
-<HAL_Driver>/Users/aphires/STM32Cube/Repository//STM32Cube_FW_F4_V1.18.0/Drivers/CMSIS</HAL_Driver>
+<ProjectName>C:\Users\ZephyR\Desktop\Fuck\iLight\\iLight</ProjectName>
+<CMSIS>..\Drivers\CMSIS</CMSIS>
+<HAL_Driver>C:\Users\ZephyR\STM32Cube\Repository\STM32Cube_FW_F4_V1.18.0\Drivers\CMSIS</HAL_Driver>
 
 <Toolchain>SW4STM32</Toolchain>
 <Version>0</Version>
 
 <filestoremove>
 	<file>
+	   		<name>..\Src\main.c</name>
+	   		<name>..\Src\stm32f4xx_it.c</name>
+	   		<name>..\Src\stm32f4xx_hal_msp.c</name>
 	</file>
 </filestoremove>
 
@@ -17,12 +20,17 @@
 	   <include></include>
     </Aincludes>
 	<Cincludes>
+	   		<include>../Drivers/STM32F4xx_HAL_Driver/Inc</include>
+	   		<include>../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy</include>
+	   		<include>../Drivers/CMSIS/Device/ST/STM32F4xx/Include</include>
+	   		<include>../Drivers/CMSIS/Include</include>
+	   		<include>../Inc</include>
     </Cincludes>
 </inctoremove>
 
 <configs>
   <config>
-    <name>iLight_test</name>				
+    <name>iLight</name>				
     <device>STM32F407VGTx</device>		 
     <heapSize>0x200</heapSize>
     <stackSize>0x400</stackSize>
@@ -32,7 +40,7 @@
     <usedDebug>true</usedDebug>
     	<debugprobe></debugprobe>
     <optimization>6</optimization>
-    <icfloc>1</icfloc>
+    <icfloc>0</icfloc>
     <Adefines>
         <define></define>
     </Adefines>   
@@ -44,14 +52,16 @@
 	    	<include></include>
     </Aincludes>
     <Cdefines>
-        <define>__weak=&quot;__attribute__((weak))&quot;</define>
-        <define>__packed=&quot;__attribute__((__packed__))&quot;</define>
+        <define>__weak=__attribute__((weak))</define>
+        <define>__packed=__attribute__((__packed__))</define>
     </Cdefines>
     <definestoremove>
         <Adefines>
             <define></define>
         </Adefines>
         <Cdefines>
+            <define>__weak=&quot;__attribute__((weak))&quot;</define>
+            <define>__packed=&quot;__attribute__((__packed__))&quot;</define>
             <define>USE_FULL_LL_DRIVER</define>
             <define>MBEDTLS_CONFIG_FILE=&quot;mbedtls_config.h&quot;</define>
             <define>_TIMEVAL_DEFINED</define>
@@ -60,11 +70,11 @@
     </definestoremove>
     
 	<Cincludes>
-	   <include>../Inc</include>
-	   <include>../Drivers/STM32F4xx_HAL_Driver/Inc</include>
-	   <include>../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy</include>
-	   <include>../Drivers/CMSIS/Device/ST/STM32F4xx/Include</include>
-	   <include>../Drivers/CMSIS/Include</include>
+	   <include>..\Inc</include>
+	   <include>..\Drivers\STM32F4xx_HAL_Driver\Inc</include>
+	   <include>..\Drivers\STM32F4xx_HAL_Driver\Inc\Legacy</include>
+	   <include>..\Drivers\CMSIS\Device\ST\STM32F4xx\Include</include>
+	   <include>..\Drivers\CMSIS\Include</include>
 
     </Cincludes>
       </config>
