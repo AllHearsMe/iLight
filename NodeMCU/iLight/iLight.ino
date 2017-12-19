@@ -62,6 +62,7 @@ void setup()
   microgear.connect(APPID);
   
   test_count = 0;
+  STMSerial.begin(9600);
 }
 
 void loop() 
@@ -93,5 +94,5 @@ void loop()
     Serial.println("connection lost, reconnect...");
     microgear.connect(APPID);
   }
-  delay(100);
+  delay(1000);
 }
