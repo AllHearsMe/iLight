@@ -27,7 +27,7 @@ Src/%.o: ../Src/%.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: MCU GCC Compiler'
 	@echo $(PWD)
-	arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 '-D__weak=__attribute__((weak))' '-D__packed="__attribute__((__packed__))"' -DUSE_HAL_DRIVER -DSTM32F407xx -I"/Users/aphires/Documents/workspace/iLight_test/Inc" -I"/Users/aphires/Documents/workspace/iLight_test/Drivers/STM32F4xx_HAL_Driver/Inc" -I"/Users/aphires/Documents/workspace/iLight_test/Drivers/STM32F4xx_HAL_Driver/Inc/Legacy" -I"/Users/aphires/Documents/workspace/iLight_test/Drivers/CMSIS/Device/ST/STM32F4xx/Include" -I"/Users/aphires/Documents/workspace/iLight_test/Drivers/CMSIS/Include" -I"/Users/aphires/Documents/workspace/iLight_test/Inc"  -Og -g3 -Wall -fmessage-length=0 -ffunction-sections -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
+	arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 '-D__weak=__attribute__((weak))' '-D__packed="__attribute__((__packed__))"' -DUSE_HAL_DRIVER -DSTM32F407xx -I"/Users/aphires/git/iLight/Inc" -I"/Users/aphires/git/iLight/Drivers/STM32F4xx_HAL_Driver/Inc" -I"/Users/aphires/git/iLight/Drivers/STM32F4xx_HAL_Driver/Inc/Legacy" -I"/Users/aphires/git/iLight/Drivers/CMSIS/Device/ST/STM32F4xx/Include" -I"/Users/aphires/git/iLight/Drivers/CMSIS/Include"  -Og -g3 -Wall -fmessage-length=0 -ffunction-sections -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

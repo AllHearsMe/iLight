@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Project>
-<ProjectName>/Users/aphires/Documents/workspace/iLight_test/\iLight_test</ProjectName>
+<ProjectName>/Users/aphires/git/iLight/\iLight_test</ProjectName>
 <CMSIS>../Drivers/CMSIS</CMSIS>
 <HAL_Driver>/Users/aphires/STM32Cube/Repository//STM32Cube_FW_F4_V1.18.0/Drivers/CMSIS</HAL_Driver>
 
@@ -32,7 +32,7 @@
     <usedDebug>true</usedDebug>
     	<debugprobe></debugprobe>
     <optimization>6</optimization>
-    <icfloc>0</icfloc>
+    <icfloc>1</icfloc>
     <Adefines>
         <define></define>
     </Adefines>   

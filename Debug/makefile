@@ -28,13 +28,13 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: iLight_test.elf
+all: iLight.elf
 
 # Tool invocations
-iLight_test.elf: $(OBJS) $(USER_OBJS) ../STM32F407VGTx_FLASH.ld
+iLight.elf: $(OBJS) $(USER_OBJS) ../STM32F407VGTx_FLASH.ld
 	@echo 'Building target: $@'
 	@echo 'Invoking: MCU GCC Linker'
-	arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -specs=nosys.specs -specs=nano.specs -T"../STM32F407VGTx_FLASH.ld" -Wl,-Map=output.map -Wl,--gc-sections -o "iLight_test.elf" @"objects.list" $(USER_OBJS) $(LIBS) -lm
+	arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -specs=nosys.specs -specs=nano.specs -T"../STM32F407VGTx_FLASH.ld" -Wl,-Map=output.map -Wl,--gc-sections -o "iLight.elf" @"objects.list" $(USER_OBJS) $(LIBS) -lm
 	@echo 'Finished building target: $@'
 	@echo ' '
 	$(MAKE) --no-print-directory post-build
@@ -46,8 +46,8 @@ clean:
 
 post-build:
 	-@echo 'Generating binary and Printing size information:'
-	arm-none-eabi-objcopy -O binary "iLight_test.elf" "iLight_test.bin"
-	arm-none-eabi-size "iLight_test.elf"
+	arm-none-eabi-objcopy -O binary "iLight.elf" "iLight.bin"
+	arm-none-eabi-size "iLight.elf"
 	-@echo ' '
 
 .PHONY: all clean dependents
