@@ -57,9 +57,9 @@ UART_HandleTypeDef huart2;
 /* Private variables ---------------------------------------------------------*/
 uint32_t US015_echo_time, US015_distance, temp_echo_time;
 char data[64];
+char l1,l2,l3,l4,l5,l6;
 uint16_t dc = 0, pulse = 0, count = 0, inc = 1, dc2 = 5, count2 = 0;
-int16_t state = 0;
-int16_t ldr = 200, distance = 200;
+int16_t state = 0,ldr = 200, distance = 200;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -152,10 +152,8 @@ void dimming() {
 			}
 		}
 		if (dc <= 140) {
-			if (count2 < dc2)
-				HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_SET);
-			else
-				HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_RESET);
+			if (count2 < dc2)HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_SET);
+			else HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_RESET);
 			if (++count2 >= 100) {
 				count2 = 0;
 				if (++pulse >= 10) {
@@ -164,10 +162,8 @@ void dimming() {
 			}
 		}
 		if (dc <= 80 || dc > 160) {
-			if (count2 < dc2)
-				HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13, GPIO_PIN_SET);
-			else
-				HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13, GPIO_PIN_RESET);
+			if (count2 < dc2)HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13, GPIO_PIN_SET);
+			else HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13, GPIO_PIN_RESET);
 			if (++count2 >= 100) {
 				count2 = 0;
 				if (++pulse >= 10) {
@@ -176,10 +172,8 @@ void dimming() {
 			}
 		}
 		if (dc <= 20 || dc > 100) {
-			if (count2 < dc2)
-				HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_SET);
-			else
-				HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_RESET);
+			if (count2 < dc2)HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_SET);
+			else HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_RESET);
 			if (++count2 >= 100) {
 				count2 = 0;
 				if (++pulse >= 10) {
@@ -187,6 +181,13 @@ void dimming() {
 				}
 			}
 		}
+		l2 = '2';
+		l3 = '2';
+		l4 = '2';
+	}else{
+		l2 = '0';
+		l3 = '0';
+		l4 = '0';
 	}
 }
 
@@ -197,9 +198,10 @@ void dayNight(){
 		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_RESET);
 		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_5, GPIO_PIN_RESET);
 		dc = 0;
+		l1 = '0';
 	} else if (state == 1) {
 		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_5, GPIO_PIN_SET);
-
+		l1 = '1';
 	}
 }
 
@@ -230,6 +232,7 @@ int main(void)
 
   /* USER CODE BEGIN Init */
 	int sp = 0;
+
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -274,28 +277,45 @@ int main(void)
 		US015_distance = (US015_echo_time * 34 / 100) / 2;
 
 		dayNight();
+
+		//Distance
 		if(US015_distance < distance*0.7){
 			HAL_GPIO_WritePin(GPIOD, GPIO_PIN_11, GPIO_PIN_SET);
+			l5 = '1';
 		}else{
 			HAL_GPIO_WritePin(GPIOD, GPIO_PIN_11, GPIO_PIN_RESET);
+			l5 = '0';
 		}
+		//Path
 		if (US015_distance < distance*0.8 && US015_distance > 0 && sp == 0) {
 			sp = 1;
 			if (dc <= 20)dc = 220;
 		} else if (US015_distance > distance-10) {
 			sp = 0;
 		}
-		//debugger
-		sprintf(data, "[%d] -> {%d}\n\r", US015_echo_time, US015_distance);
-		HAL_UART_Transmit(&huart2, data, 64, 100);
-		HAL_Delay(900);
-
+		//Switch
 		if(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_0) == GPIO_PIN_SET){
 			HAL_Delay(100);
 			if(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_0) == GPIO_PIN_SET){
 				HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_15);
+				if(HAL_GPIO_ReadPin(GPIOD,GPIO_PIN_15) == GPIO_PIN_SET) l6 = 1;
+				else l6 =0;
 			}
 		}
+
+		//Transmit
+		HAL_UART_Transmit(&huart2, l1, 1, 100);
+		HAL_UART_Transmit(&huart2, l2, 1, 100);
+		HAL_UART_Transmit(&huart2, l3, 1, 100);
+		HAL_UART_Transmit(&huart2, l4, 1, 100);
+		HAL_UART_Transmit(&huart2, l5, 1, 100);
+		HAL_UART_Transmit(&huart2, l6, 1, 100);
+		//debugger
+//		sprintf(data, "[%d] -> {%d}\n\r", US015_echo_time, US015_distance);
+//		HAL_UART_Transmit(&huart2, data, 64, 100);
+//		HAL_Delay(900);
+//
+
 	}
   /* USER CODE END 3 */
 
