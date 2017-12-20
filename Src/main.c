@@ -58,7 +58,8 @@ UART_HandleTypeDef huart2;
 uint32_t US015_echo_time, US015_distance, temp_echo_time;
 char data[64];
 char l1,l2,l3,l4,l5,l6;
-uint16_t dc = 0, pulse = 0, count = 0, inc = 1, dc2 = 5, count2 = 0;
+uint8_t str[64], ch = '\0';
+uint16_t dc = 0, pulse = 0, count = 0, inc = 1, dc2 = 5, count2 = 0, sp = 0;
 int16_t state = 0,ldr = 200, distance = 200;
 /* USER CODE END PV */
 
@@ -75,6 +76,11 @@ static void MX_ADC1_Init(void);
 /* Private function prototypes -----------------------------------------------*/
 void dimming(void);
 void dayNight(void);
+void distances(void);
+void path(void);
+void switchLED(uint8_t);
+void receive(void);
+void transmit(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
@@ -224,6 +230,73 @@ void dayNight(){
 	}
 }
 
+void distances(){
+	if(US015_distance < distance*0.7){
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_11, GPIO_PIN_SET);
+		l5 = '1';
+	}else{
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_11, GPIO_PIN_RESET);
+		l5 = '0';
+	}
+}
+
+void path(){
+	if (US015_distance < distance*0.8 && US015_distance > 0 && sp == 0) {
+		sp = 1;
+		if (dc <= 20)dc = 220;
+	} else if (US015_distance > distance-10) {
+		sp = 0;
+	}
+}
+
+void switchLED(uint8_t s){
+	if(s == '1'){
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15,GPIO_PIN_SET);
+		l6=1;
+	}else{
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15,GPIO_PIN_RESET);
+		l6=0;
+	}
+}
+
+void receive(){
+	 int i = 0;
+	      while(ch != '[') HAL_UART_Receive(&huart2, &ch, 1, 100);
+	      HAL_UART_Receive(&huart2, &ch, 1, 50);
+	      while(ch != ']')
+	      {
+	          str[i++] = ch;
+	          HAL_UART_Receive(&huart2, &ch, 1, 50);
+	      }
+	 int d = 0;
+	 int j = 0;
+	 while(str[j] != ';'){
+		 d+= str[j]-'0';
+		 d*=10;
+		 j++;
+	 }
+	 distance = d;
+	 j++;
+	 d=0;
+	 while(str[j] != ';'){
+		 d+= str[j]-'0';
+		 d*=10;
+		 j++;
+	 }
+	 ldr = d;
+	 j++;
+	 switchLED(str[j]);
+}
+
+void transmit(){
+	HAL_UART_Transmit(&huart2, l1, 1, 100);
+	HAL_UART_Transmit(&huart2, l2, 1, 100);
+	HAL_UART_Transmit(&huart2, l3, 1, 100);
+	HAL_UART_Transmit(&huart2, l4, 1, 100);
+	HAL_UART_Transmit(&huart2, l5, 1, 100);
+	HAL_UART_Transmit(&huart2, l6, 1, 100);
+}
+
 void cal() {
 	int a = HAL_ADC_GetValue(&hadc1);
 	char c[128];
@@ -310,39 +383,12 @@ int main(void)
 		US015_distance = (US015_echo_time * 34 / 100) / 2;
 
 		dayNight();
-
-		//Distance
-		if(US015_distance < distance*0.7){
-			HAL_GPIO_WritePin(GPIOD, GPIO_PIN_11, GPIO_PIN_SET);
-			l5 = '1';
-		}else{
-			HAL_GPIO_WritePin(GPIOD, GPIO_PIN_11, GPIO_PIN_RESET);
-			l5 = '0';
+		distances();
+		path();
+		if(HAL_GPIO_ReadPin(GPIOD,GPIO_PIN_9) == GPIO_PIN_SET){
+			receive();
 		}
-		//Path
-		if (US015_distance < distance*0.8 && US015_distance > 0 && sp == 0) {
-			sp = 1;
-			if (dc <= 20)dc = 220;
-		} else if (US015_distance > distance-10) {
-			sp = 0;
-		}
-		//Switch
-		if(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_0) == GPIO_PIN_SET){
-			HAL_Delay(100);
-			if(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_0) == GPIO_PIN_SET){
-				HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_15);
-				if(HAL_GPIO_ReadPin(GPIOD,GPIO_PIN_15) == GPIO_PIN_SET) l6 = 1;
-				else l6 =0;
-			}
-		}
-
-		//Transmit
-		HAL_UART_Transmit(&huart2, l1, 1, 100);
-		HAL_UART_Transmit(&huart2, l2, 1, 100);
-		HAL_UART_Transmit(&huart2, l3, 1, 100);
-		HAL_UART_Transmit(&huart2, l4, 1, 100);
-		HAL_UART_Transmit(&huart2, l5, 1, 100);
-		HAL_UART_Transmit(&huart2, l6, 1, 100);
+		transmit();
 		//debugger
 //		sprintf(data, "[%d] -> {%d}\n\r", US015_echo_time, US015_distance);
 //		HAL_UART_Transmit(&huart2, data, 64, 100);
