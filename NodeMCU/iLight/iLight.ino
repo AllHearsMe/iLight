@@ -10,7 +10,7 @@
 #define SECRET  "LgJmdco46P1GzPEslEhJBQ7il"
 
 #define ALIAS   "iLight_NodeMCU"
-#define TargetWeb "HTML_web_test"
+#define TargetWeb "HTML_web"
 
 SoftwareSerial STMSerial(5, 4); // D1, D2
 
@@ -37,23 +37,21 @@ void onMsghandler(char *topic, uint8_t* msg, unsigned int msglen)
   Serial.print("Message from NETPIE: ");
   msg[msglen] = '\0';
   Serial.println((char *) msg);
-//  Serial.printf("[%s]\n", msg);
-//  STMSerial.print('[');
-//  STMSerial.print((char *) msg);
-//  STMSerial.print(']');
-//  STMSerial.printf("[%s]", msg);
-//  STMSerial.printf("%s\r", msg);
+
+//  char* test = "{\"distance\":123,\"ldr\":456,\"sw\":1}";
   
-  JsonObject& root = jsonBuffer.parseObject((char *) msg);
-  int distance = root["distance"];
-  int ldr = root["ldr"];
-  int sw = root["switch"];
+//  JsonObject& root = jsonBuffer.parseObject((char *) msg);
+////  JsonObject& root = jsonBuffer.parseObject(test);
+//  int distance = root["distance"];
+//  int ldr = root["ldr"];
+//  int sw = root["switch"];
   
 //  STMSerial.print('[');
-  STMSerial.print(distance); STMSerial.print(';');
-  STMSerial.print(ldr); STMSerial.print(';');
-  STMSerial.print(sw); STMSerial.print(';');
-  STMSerial.print('\r');
+//  STMSerial.print(distance); STMSerial.print(';');
+//  STMSerial.print(ldr); STMSerial.print(';');
+//  STMSerial.print(sw); STMSerial.print(';');
+  STMSerial.printf("%s\r", msg);
+//  STMSerial.print('\r');
 }
 
 
@@ -107,24 +105,27 @@ void loop()
     microgear.loop();
 //    Serial.println("connected");
     char msg[128];
-    int i = 0;
+    int i = 0, j;
     while(STMSerial.available() > 0)
     {
       msg[i++] = STMSerial.read();
       delay(1);
     }
     msg[i] = '\0';
+//    msg[6] = '\0';
     if(i > 0)
     {
-      Serial.print("Message from STM32: ");    
+      Serial.print("Message from STM32: ");
       Serial.println(msg);
 
-      JsonObject& root = jsonBuffer.createObject();
-      JsonArray& lights = root.createNestedArray("lights");
-      int j;
-      for(j=0; j<6; j++) lights.add((int) (msg[i] - '0'));
-      root.printTo(msg, 128);
-      
+//      JsonObject& root = jsonBuffer.createObject();
+//      JsonArray& lights = root.createNestedArray("lights");
+//      for(j=0; j<6; j++) lights.add(msg[i] - '0');
+//      root.printTo(msg, 128);
+
+//      Serial.print("Data sent to NETPIE: ");
+//      Serial.println(msg);
+      msg[6] = '\0';
       microgear.chat(TargetWeb, msg);
     }
   }

@@ -56,11 +56,12 @@ UART_HandleTypeDef huart2;
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
 uint32_t US015_echo_time, US015_distance, temp_echo_time;
-char data[64];
-char l1,l2,l3,l4,l5,l6;
-uint8_t str[64], ch = '\0';
+uint8_t l[64] = "000000";
 uint16_t dc = 0, pulse = 0, count = 0, inc = 1, dc2 = 5, count2 = 0, sp = 0;
 int16_t state = 0,ldr = 200, distance = 200;
+int data_in_l, data_received;
+unsigned char data_in[64], buff;
+int a;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -79,13 +80,11 @@ void dayNight(void);
 void distances(void);
 void path(void);
 void switchLED(uint8_t);
-void receive(void);
+void parse(void);
 void transmit(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-int data_in_l, data_received;
-unsigned char data_in[64], buff;
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
@@ -206,13 +205,13 @@ void dimming() {
 				}
 			}
 		}
-		l2 = '2';
-		l3 = '2';
-		l4 = '2';
+		l[1] = '2';
+		l[2] = '2';
+		l[3] = '2';
 	}else{
-		l2 = '0';
-		l3 = '0';
-		l4 = '0';
+		l[1] = '0';
+		l[2] = '0';
+		l[3] = '0';
 	}
 }
 
@@ -223,20 +222,20 @@ void dayNight(){
 		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_RESET);
 		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_5, GPIO_PIN_RESET);
 		dc = 0;
-		l1 = '0';
+		l[0] = '0';
 	} else if (state == 1) {
 		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_5, GPIO_PIN_SET);
-		l1 = '1';
+		l[0] = '1';
 	}
 }
 
 void distances(){
 	if(US015_distance < distance*0.7){
 		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_11, GPIO_PIN_SET);
-		l5 = '1';
+		l[4] = '1';
 	}else{
 		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_11, GPIO_PIN_RESET);
-		l5 = '0';
+		l[4] = '0';
 	}
 }
 
@@ -252,53 +251,49 @@ void path(){
 void switchLED(uint8_t s){
 	if(s == '1'){
 		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15,GPIO_PIN_SET);
-		l6=1;
+		l[5] = '1';
 	}else{
 		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15,GPIO_PIN_RESET);
-		l6=0;
+		l[5] = '0';
 	}
 }
 
-void receive(){
-	 int i = 0;
-	      while(ch != '[') HAL_UART_Receive(&huart2, &ch, 1, 100);
-	      HAL_UART_Receive(&huart2, &ch, 1, 50);
-	      while(ch != ']')
-	      {
-	          str[i++] = ch;
-	          HAL_UART_Receive(&huart2, &ch, 1, 50);
-	      }
+void parse(){
 	 int d = 0;
 	 int j = 0;
-	 while(str[j] != ';'){
-		 d+= str[j]-'0';
+	 while(data_in[j] != ';'){
 		 d*=10;
+		 d+= data_in[j]-'0';
 		 j++;
 	 }
 	 distance = d;
 	 j++;
 	 d=0;
-	 while(str[j] != ';'){
-		 d+= str[j]-'0';
+	 while(data_in[j] != ';'){
 		 d*=10;
+		 d+= data_in[j]-'0';
 		 j++;
 	 }
 	 ldr = d;
 	 j++;
-	 switchLED(str[j]);
+	 switchLED(data_in[j]);
 }
 
 void transmit(){
-	HAL_UART_Transmit(&huart2, l1, 1, 100);
-	HAL_UART_Transmit(&huart2, l2, 1, 100);
-	HAL_UART_Transmit(&huart2, l3, 1, 100);
-	HAL_UART_Transmit(&huart2, l4, 1, 100);
-	HAL_UART_Transmit(&huart2, l5, 1, 100);
-	HAL_UART_Transmit(&huart2, l6, 1, 100);
+	l[6] = '\0';
+//	l[6] = '|';
+	sprintf(l, "%s|%d|%d|%lu|%d", l, a, ldr, US015_distance, distance);
+	HAL_UART_Transmit(&huart2, l, 32, 100);
+//	HAL_UART_Transmit_IT(&huart2, &l[0], 1);
+//	HAL_UART_Transmit_IT(&huart2, &l[1], 1);
+//	HAL_UART_Transmit_IT(&huart2, &l[2], 1);
+//	HAL_UART_Transmit_IT(&huart2, &l[3], 1);
+//	HAL_UART_Transmit_IT(&huart2, &l[4], 1);
+//	HAL_UART_Transmit_IT(&huart2, &l[5], 1);
 }
 
 void cal() {
-	int a = HAL_ADC_GetValue(&hadc1);
+	a = HAL_ADC_GetValue(&hadc1);
 	char c[128];
 	sprintf(c, "%d\n\r", a);
 	//HAL_UART_Transmit(&huart2,c,strlen(c),100);
@@ -323,7 +318,6 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-	int sp = 0;
 
   /* USER CODE END Init */
 
@@ -360,14 +354,12 @@ int main(void)
 
   /* USER CODE BEGIN 3 */
 
-		// Example: send received data back
+		// Data from NodeMCU
 		if(data_received)
 		{
 			  data_received = 0;
-
-			  // Do whatever
+			  parse();
 //			  HAL_UART_Transmit_IT(&huart2, data_in, data_in_l);
-
 			  data_in_l = 0;
 		}
 
@@ -385,15 +377,8 @@ int main(void)
 		dayNight();
 		distances();
 		path();
-		if(HAL_GPIO_ReadPin(GPIOD,GPIO_PIN_9) == GPIO_PIN_SET){
-			receive();
-		}
 		transmit();
-		//debugger
-//		sprintf(data, "[%d] -> {%d}\n\r", US015_echo_time, US015_distance);
-//		HAL_UART_Transmit(&huart2, data, 64, 100);
-//		HAL_Delay(900);
-//
+		HAL_Delay(900);
 
 	}
   /* USER CODE END 3 */
