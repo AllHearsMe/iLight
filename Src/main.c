@@ -78,6 +78,25 @@ void dayNight(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
+int data_in_l, data_received;
+unsigned char data_in[64], buff;
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+  if(huart->Instance == USART2)
+  {
+	  if(buff != '\r')
+	  {
+		  data_in[data_in_l++] = buff;
+	  }
+	  else
+	  {
+		  data_received = 1;
+	  }
+	  HAL_UART_Receive_IT(&huart2, &buff, 1);
+  }
+}
+
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	if (htim == &htim10) {
 		dimming();
@@ -222,7 +241,7 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-//w
+
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -256,6 +275,9 @@ int main(void)
 	HAL_TIM_Base_Start_IT(&htim10);
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_SET);
 
+	data_in_l = data_received = 0;
+	HAL_UART_Receive_IT(&huart2, &buff, 1);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -264,6 +286,17 @@ int main(void)
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
+
+		// Example: send received data back
+		if(data_received)
+		{
+			  data_received = 0;
+
+			  // Do whatever
+//			  HAL_UART_Transmit_IT(&huart2, data_in, data_in_l);
+
+			  data_in_l = 0;
+		}
 
 		// LDR analog input
 		HAL_ADC_Start(&hadc1);

@@ -42,18 +42,18 @@ void onMsghandler(char *topic, uint8_t* msg, unsigned int msglen)
 //  STMSerial.print((char *) msg);
 //  STMSerial.print(']');
 //  STMSerial.printf("[%s]", msg);
-  STMSerial.printf("%s\r", msg);
+//  STMSerial.printf("%s\r", msg);
   
-//  JsonObject& root = jsonBuffer.parseObject((char *) msg);
-//  int distance = root["distance"];
-//  int ldr = root["ldr"];
-//  int sw = root["switch"];
-//  
+  JsonObject& root = jsonBuffer.parseObject((char *) msg);
+  int distance = root["distance"];
+  int ldr = root["ldr"];
+  int sw = root["switch"];
+  
 //  STMSerial.print('[');
-//  STMSerial.print(distance); STMSerial.print(';');
-//  STMSerial.print(ldr); STMSerial.print(';');
-//  STMSerial.print(sw); STMSerial.print(';');
-//  STMSerial.print(']');
+  STMSerial.print(distance); STMSerial.print(';');
+  STMSerial.print(ldr); STMSerial.print(';');
+  STMSerial.print(sw); STMSerial.print(';');
+  STMSerial.print('\r');
 }
 
 
@@ -123,7 +123,7 @@ void loop()
       JsonArray& lights = root.createNestedArray("lights");
       int j;
       for(j=0; j<6; j++) lights.add((int) (msg[i] - '0'));
-      
+      root.printTo(msg, 128);
       
       microgear.chat(TargetWeb, msg);
     }
