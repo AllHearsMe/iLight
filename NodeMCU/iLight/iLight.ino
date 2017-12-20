@@ -3,6 +3,7 @@
 #include <MicroGear.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266WiFiMulti.h>
+#include <ArduinoJson.h>
 
 #define APPID   "iLight"
 #define KEY     "Q3XUy22q0cgxB9R"
@@ -17,6 +18,8 @@ ESP8266WiFiMulti wifiMulti;
 
 WiFiClient client;
 MicroGear microgear(client);
+
+StaticJsonBuffer<256> jsonBuffer;
 
 int test_count;
 
@@ -34,9 +37,23 @@ void onMsghandler(char *topic, uint8_t* msg, unsigned int msglen)
   Serial.print("Message from NETPIE: ");
   msg[msglen] = '\0';
   Serial.println((char *) msg);
-  STMSerial.print('[');
-  STMSerial.print((char *) msg);
-  STMSerial.print(']');
+//  Serial.printf("[%s]\n", msg);
+//  STMSerial.print('[');
+//  STMSerial.print((char *) msg);
+//  STMSerial.print(']');
+//  STMSerial.printf("[%s]", msg);
+  STMSerial.printf("%s\r", msg);
+  
+//  JsonObject& root = jsonBuffer.parseObject((char *) msg);
+//  int distance = root["distance"];
+//  int ldr = root["ldr"];
+//  int sw = root["switch"];
+//  
+//  STMSerial.print('[');
+//  STMSerial.print(distance); STMSerial.print(';');
+//  STMSerial.print(ldr); STMSerial.print(';');
+//  STMSerial.print(sw); STMSerial.print(';');
+//  STMSerial.print(']');
 }
 
 
@@ -101,6 +118,13 @@ void loop()
     {
       Serial.print("Message from STM32: ");    
       Serial.println(msg);
+
+      JsonObject& root = jsonBuffer.createObject();
+      JsonArray& lights = root.createNestedArray("lights");
+      int j;
+      for(j=0; j<6; j++) lights.add((int) (msg[i] - '0'));
+      
+      
       microgear.chat(TargetWeb, msg);
     }
   }
