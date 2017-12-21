@@ -1,0 +1,277 @@
+<html>
+
+<head>
+    <title>iLight</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb"
+        crossorigin="anonymous">
+    <style>
+        .currentSetting {
+            padding-right: 50px;
+            padding-left: 50px;
+            background: lightgray;
+            margin-right: 50px;
+            border-color: black;
+            border-width: 1px;
+            border-style: solid;
+        }
+
+        .setting {
+            padding-left: 50px;
+            padding-right: 50px;
+            background: lightgray;
+            border-color: black;
+            border-width: 1px;
+            border-style: solid;
+        }
+
+        .container-fluid {
+            background: lightblue;
+
+        }
+
+        .setting:hover {
+            background-color: gainsboro;
+            border-color: lightblue;
+            transition-delay: 0s;
+            transition-duration: 0.5s;
+            transition-property: border;
+            transition-timing-function: linear;
+
+
+        }
+
+        .currentSetting:hover {
+            background-color: gainsboro;
+            border-color: lightblue;
+            transition-delay: 0s;
+            transition-duration: 0.5s;
+            transition-property: border;
+            transition-timing-function: linear;
+
+        }
+        .lightshow{
+            padding-right: 50px;
+
+        }
+    </style>
+
+
+</head>
+
+<body>
+
+    <div class="container-fluid">
+
+        <div>
+            <h2> Welcome to iLight</h2>
+            <p>user:
+                <%= user %>
+            </p>
+            <% var id1 = id%>
+        </div>
+
+
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="lightshow">
+                    <img id="myImage1" src="./picture/lightoff.gif"  alt="light" width="30" height="54">
+                    <img id="myImage2" src="./picture/lightoff.gif"  alt="light" width="30" height="54">
+                    <img id="myImage3" src="./picture/lightoff.gif"  alt="light" width="30" height="54">
+                    <img id="myImage4" src="./picture/lightoff.gif"  alt="light" width="30" height="54">
+                    <img id="myImage5" src="./picture/lightoff.gif"  alt="light" width="30" height="54">
+                    <img id="myImage6" src="./picture/lightoff.gif"  alt="light" width="30" height="54">
+
+
+
+            </div>
+            <div class="currentSetting">
+                <h5>current setting</h5>
+                Distance
+                <p id="cdistance">200</p>
+                LDR
+                <p id="cldr">200</p>
+                Switch
+                <p id="cswitch">0</p>
+            </div>
+
+            <div class="setting">
+                <h5>setting</h5>
+                <div>
+
+                    Distance
+                    <br>
+                    <input type="text" name='distance' id="distance" placeholder="Your Distance">
+
+                </div>
+
+                <div>
+                    LDR
+                    <br>
+                    <input type="text" name='ldr' id='ldr' placeholder="Your LDR">
+                </div>
+
+                <div>
+                    Switch
+
+                    <input type="radio" name='switch' value=1>on
+                    <input type="radio" name='switch' value=0>off
+
+                </div>
+                <br>
+                <div>
+
+                    <button onclick="dos()">Submit</button>
+                    <button onclick="back()">Back</button>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <script>
+        var obj = {distance:200,ldr:200,switch:0}
+        function dos() {
+            var di = document.getElementById('distance')
+            var ldr = document.getElementById('ldr')
+            var sw = document.getElementsByName('switch')
+
+            var n1 = false
+            var n2 = false
+
+            var c1 = false
+            var c2 = false
+            var c3 = false
+
+            if (di.value != "") {
+                c1 = true
+                var x = +di.value || -1
+                if (x >= 0) {
+                    obj.distance = x
+                    n1 = true
+
+                }
+            }
+            if (ldr.value != "") {
+                c2 = true
+                var x = +ldr.value || -1
+                if (x >= 0) {
+                    obj.ldr = x
+                    n2 = true
+                }
+            }
+
+
+            for (var i = 0; i < sw.length; i++) {
+                if (sw[i].checked) {
+                    obj.switch = sw[i].value
+                    c3 = true
+                    break
+                }
+            }
+            if (c1 && c2 && c3 && n1 && n2) {
+                var ans = "" + obj.distance + ";"
+                    + obj.ldr + ";" + obj.switch + ";"
+                alert(ans)
+                document.getElementById('cdistance').innerText =obj.distance
+                document.getElementById('cldr').innerText =obj.ldr
+                document.getElementById('cswitch').innerText =obj.switch
+
+                //use mcirogear
+                microgear.chat(thing1,ans)
+
+
+
+            }
+            if (!c1 || !c2 || !c3) alert('miss some input')
+            else if (!n1) alert('Distance should be positive number')
+            else if (!n2) alert('LDR should be positive number')
+        }
+
+        function back() {
+            location.href = '/login'
+        }
+        function light(x){
+            if(x==1)return './picture/lighton.gif'
+            if(x==2)return './picture/lightmed.gif'
+            else return './picture/lightoff.gif'
+        }
+
+
+    </script>
+
+    <script src="https://cdn.netpie.io/microgear.js"></script>
+
+    <script>
+        const APPID = "iLight";
+        const KEY = "P20Tmh4X3psK659";
+        const SECRET = "XMciiy8uuNm7bUDkiQ2n25voZ";
+
+        const ALIAS = "HTML_web";         //  ชื่อตัวเอง
+        const thing1 = "iLight_NodeMCU";          //  ชื่อเพื่อนที่จะคุย
+
+        var microgear = Microgear.create({
+            key: KEY,
+            secret: SECRET,
+            alias: ALIAS
+        });
+
+        microgear.on('message', function (topic, msg) {
+            
+            var data = msg.split("")
+            
+
+
+
+            document.getElementById("myImage1").src = light(data[0])
+            document.getElementById("myImage2").src = light(data[1])
+            document.getElementById("myImage3").src = light(data[2])
+            document.getElementById("myImage4").src = light(data[3])
+            document.getElementById("myImage5").src = light(data[4])
+            document.getElementById("myImage6").src = light(data[5])
+
+            
+        });
+
+        microgear.on('connected', function () {
+            microgear.setAlias(ALIAS);
+            alert('connected')
+        });
+
+        microgear.on('present', function (event) {
+            console.log(event);
+        });
+
+        microgear.on('absent', function (event) {
+            console.log(event);
+        });
+
+        microgear.resettoken(function (err) {
+            microgear.connect(APPID);
+        });
+
+
+
+
+
+
+
+    </script>
+
+
+
+</body>
+
+
+
+
+
+
+
+
+
+</html>
